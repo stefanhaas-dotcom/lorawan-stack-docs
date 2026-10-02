@@ -1,22 +1,27 @@
 ---
 title: "evrlast"
-description: "evrlast IoT platform"
+description: "Forward LoRaWAN uplinks from The Things Stack to the evrlast cloud platform with a webhook, and manage evrlast LoRaWAN devices"
+weight:
 ---
 
-**Evrlast** is a cloud platform for the automatic collection, monitoring, and analysis of sensor data. Evrlast devices continuously measure environmental and operational parameters, transmit the data wirelessly to the Evrlast Cloud, and notify users whenever configured thresholds are exceeded. The Evrlast web [application](https://app.evrlast.com) provides a centralized dashboard for monitoring and managing all sensor data.
+[evrlast](https://app.evrlast.com) is a cloud platform for the automatic collection, monitoring, and analysis of sensor data. evrlast devices continuously measure environmental and operational parameters, transmit the data wirelessly to the evrlast cloud, and notify users whenever configured thresholds are exceeded. The evrlast web application provides a centralized dashboard for monitoring and managing all sensor data.
 
-In addition to native Evrlast devices, **The Things Network (TTN)** can be integrated as an additional data provider. Sensor data from TTN can be forwarded to the Evrlast platform using **TTN Webhooks**, allowing you to monitor and analyze LoRaWAN devices from TTN alongside your Evrlast devices in a single platform.
+In addition to native evrlast devices, {{% tts %}} can be integrated as an additional data provider. Sensor data from {{% tts %}} is forwarded to the evrlast platform using webhooks, allowing you to monitor and analyze LoRaWAN devices from {{% tts %}} alongside your evrlast devices in a single platform.
+
+<!--more-->
+
+{{< note >}} The screenshots in this guide show the German user interface of the evrlast web application. The English labels used in the text correspond to the German labels in the screenshots. {{</ note >}}
 
 ## Create an Account
 
-If you do not already have an **Evrlast account**, you first need to register:
+If you do not already have an evrlast account, you first need to register:
 
 1. Open [evrlast](https://app.evrlast.com) in your web browser.
-2. Click **Sign Up** and enter your email address and a password.
+2. Click **Just use this link to register!** and enter your email address and a password.
 3. You will receive a confirmation email. Click the link in the email to activate your account.
 4. Sign in using your email address and password.
 
-See also [evrlast documentation](https://docs.evrlast.com/cloud/account_creation/)
+See also the [evrlast documentation](https://docs.evrlast.com/cloud/account_creation/).
 
 ## Create an API Key
 
@@ -24,94 +29,85 @@ Open your **User Profile** and navigate to the **API Keys** tab.
 
 1. Click **Add**.
 2. Confirm the creation of the new API key in the dialog.
-   <img src="create_api_key.png" alt="Create API Key">
-3. Once the API key has been generated, copy it from the following dialog and store it securely, as it will be required for configuring the integration.
-   <img src="generated_api_key.png" alt="Generated API key">
 
-See also [evrlast documentation](https://docs.evrlast.com/lorawan/api_key/api_key/)
+   {{< figure src="create_api_key.png" alt="Create API Key" >}}
 
-## Create LoRaWAN Network in evrlast
+3. The following dialog shows the generated **Api Key** and the generated **Api Passwort** (API password). Copy both values and store them securely, as they are required to configure the webhook.
 
-You just need a **LoRaWAN Network** if you want to connect your **evrlast LoRaWAN device** in the **evrlast cloud**. Devices from other manifacturers do **not** need a **LoRaWAN Network** defined in the **evrlast** cloud.
+   {{< figure src="generated_api_key.png" alt="Generated API key" >}}
 
-In the **LoRaWAN Networks** tab of your user profile, you can manage the connections to your **LoRaWAN Network Servers (LNS)**.
+{{< warning >}} The API password is shown only once. After you close the dialog, it cannot be displayed again. {{</ warning >}}
 
-A configured connection allows the **Evrlast Cloud** to communicate directly with your network server. This enables the platform to manage **Evrlast LoRaWAN devices** and their configuration without requiring manual interaction with the LNS.
+To connect your LoRaWAN network server directly with the evrlast cloud, manage the credentials in the **LoRaWAN Networks** tab, as described [below](#create-a-lorawan-network-in-evrlast).
 
-### Configure a TTN Connection
+See also the [evrlast documentation](https://docs.evrlast.com/lorawan/api_key/api_key/).
 
-To connect the Evrlast Cloud with **The Things Network (TTN)**, you need the following information from your TTN account:
+## Create a LoRaWAN Network in evrlast
+
+A **LoRaWAN Network** is only required if you want to connect an **evrlast LoRaWAN device**: it allows the evrlast cloud to communicate directly with your network server, so that the platform can manage the device and its configuration without manual interaction with the LNS. You can skip this section for LoRaWAN devices from other manufacturers.
+
+In the **LoRaWAN Networks** tab of your user profile, you can manage the connections to your LoRaWAN network servers (LNS).
+
+### Gather the Connection Details
+
+To connect the evrlast cloud with {{% tts %}}, you need the following information:
 
 - **Server URL**
 - **Application ID**
 - **Access Token**
 
-### Server URL
+#### Server URL
 
-The server URL is the address of your **The Things Stack** instance.
+The server URL is the address of your {{% tts %}} instance.
 
-### The Things Network Community Edition
+- For {{% tts %}} Community Edition (The Things Network), use the base URL of your cluster, for example `https://eu1.cloud.thethings.network`.
+- For {{% tts %}} Cloud, use the base URL of your tenant, for example `https://<tenant>.eu1.cloud.thethings.industries`.
+- If you are using a private installation of {{% tts %}}, use the URL of your own server.
 
-Use the base URL of your **The Things Stack** tenant:
+#### Application ID
 
-For example:
-
-- `https://evrlast.eu1.cloud.thethings.industries`
-- `https://evrlast.eu2.cloud.thethings.industries`
-
-If you are using a private installation of **The Things Stack**, use the URL of your own server instead.
-
-### Application ID
-
-The **Application ID** uniquely identifies your application within TTN.
+The **Application ID** uniquely identifies your application in {{% tts %}}.
 
 To find it:
 
-1. Log in to the TTN Console.
+1. Log in to the Console.
 2. Open **Applications**.
 3. Select the application you want to connect.
 4. Copy the **Application ID** displayed on the **General Information** page.
 
-> **Note:** The Application ID is also visible in the page URL after opening the application.
+{{< note >}} The Application ID is also visible in the page URL after opening the application. {{</ note >}}
 
-### Create an Access Token
+#### Access Token
 
-The Evrlast Cloud authenticates with TTN using an **API Key** (Access Token).
+The evrlast cloud authenticates with {{% tts %}} using an **API key** (access token).
 
 To create one:
 
-1. Open your application in the TTN Console.
-2. Navigate to **API Keys**.
-3. Click **+ Add API Key**.
-4. Enter a descriptive name, for example `Evrlast Cloud`.
-5. Grant the required permissions.
+1. Open your application in the Console.
+2. Navigate to **API keys**.
+3. Click **+ Add API key**.
+4. Enter a descriptive name, for example `evrlast cloud`.
+5. Grant the required permissions. At minimum, the API key needs the following right:
 
-### Required Permissions
+   - Link as Application to a Network Server for traffic exchange, i.e. read uplink and write downlink
 
-At minimum, the API key should have the following permissions:
+   Depending on the functionality used by the evrlast cloud, additional permissions may be required.
 
-- link as Application to a Network Server for traffic exchange, i.e. read uplink and write downlink
-
-> Depending on the functionality used by the Evrlast Cloud, additional permissions may be required.
-
-6. Click **Create API Key**.
+6. Click **Create API key**.
 7. Copy the generated API key immediately.
 
-> **Important:** TTN only displays the API key once. Store it securely before leaving the page.
+{{< warning >}} {{% tts %}} only displays the API key once. Store it securely before leaving the page. {{</ warning >}}
 
-### Add a Connection
+### Add the Connection
 
 Open your **User Profile** and navigate to the **LoRaWAN Networks** tab.
 
-<img src="lorawan_networks_tab.png" alt="LoRaWAN Networks">
+{{< figure src="lorawan_networks_tab.png" alt="LoRaWAN Networks" >}}
 
 1. Click the **+ Add** button in the lower-left corner.
 2. In the **Connection Details** dialog, select the **Platform** matching your network server (**TTN**).
-3. Fill in the required fields.
-
-See also [evrlast documentation](https://docs.evrlast.com/lorawan/networks/lorawan_networks/)
-
-### Configuration Fields
+3. Fill in the required fields, as described in the table below.
+4. Click **Save** to create the connection. Click **Cancel** to discard your changes without saving.
 
 | Field | Description |
 |-------|-------------|
@@ -121,28 +117,26 @@ See also [evrlast documentation](https://docs.evrlast.com/lorawan/networks/loraw
 | **Application ID** | Identifier of the application on the network server. |
 | **Access Token** | Authentication token or API key used to authenticate with the network server. Click the **eye** icon to reveal the entered value. |
 
-4. Click **Save** to create the connection.
+See also the [evrlast documentation](https://docs.evrlast.com/lorawan/networks/lorawan_networks/).
 
-Click **Cancel** to discard your changes without saving.
+## Create the Webhook
 
-## Create your Webhook to send data to evrlast
+Use the **evrlast** [Webhook template]({{< ref "/integrations/webhooks/webhook-templates" >}}) to create a Webhook integration on {{% tts %}}.
 
-Use the **evrlast Webhook Template** to create your webhook.
-
-1. Enter the username of the API key you created in the step before.
-2. Enter the password of the API key you created in the step before.
+1. Enter the **Api Key** you created above as the username.
+2. Enter the **Api Passwort** (API password) you created above as the password.
 
 ## Register a New Device
 
-After your device sent data to the **evrlast** platform, you can confirm the device request to add the device to your **evrlast device** pool. 
+In the evrlast web application, click **+ neues Gerät registrieren** (register new device) and select **LoRaWAN**. See also the [evrlast documentation](https://docs.evrlast.com/cloud/lorawan_registration/).
 
-Open the **Device Requests** section in the Evrlast web application.
+After your device has sent data to the evrlast platform, a device request is created. Confirm it to add the device to your evrlast device pool.
 
-This page lists all devices that have recently connected but have not yet been assigned to your **Evrlast account**.
+Open the **Device Requests** section in the evrlast web application. This page lists all devices that have recently connected but have not yet been assigned to your evrlast account.
 
-1. Click **Approve** next to the device you want to register.
-2. If you register a evrlast device you have to select the LoRaWAN Network you created earlier.
-3. Confirm the assignment in the dialog that appears.
-4. The device will automatically be added to your **Device List** and is ready for use.
+1. Click **Confirm** next to the device you want to register.
+2. If you register an evrlast device, select the LoRaWAN Network you created earlier in the dialog that appears. For devices from other manufacturers, you only need to confirm the assignment.
+3. Confirm the assignment.
+4. The device is automatically added to your **Device List** and is ready for use.
 
-See also [evrlast documentation](https://docs.evrlast.com/lorawan/thing_request/thing_request/)
+See also the [evrlast documentation](https://docs.evrlast.com/lorawan/thing_request/thing_request/).
